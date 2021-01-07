@@ -5,6 +5,7 @@ from flask import jsonify
 from flask import Flask
 from flask import request
 from pyimagesearch.scan import image_scan
+from flask_cors import *
 import numpy as np
 
 
@@ -22,6 +23,7 @@ def base64_cv2(base64_str):
 
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True)  # 设置跨域
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -32,7 +34,6 @@ def index():
     cv2img = base64_cv2(img)
     wraped = image_scan(cv2img)
     cv2.imshow("Image1", wraped)  # 显示图片
-    cv2.waitKey()
     base64img = cv2_base64(wraped)
 
     return jsonify({"image": "data:image/png;base64," + base64img})
