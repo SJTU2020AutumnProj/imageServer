@@ -7,6 +7,7 @@ from flask import request
 from pyimagesearch.scan import image_scan
 from flask_cors import *
 import numpy as np
+import check
 
 
 def cv2_base64(image):
@@ -22,12 +23,18 @@ def base64_cv2(base64_str):
     return image
 
 
+def getImageVar(image):
+    img2gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    imageVar = cv2.Laplacian(img2gray, cv2.CV_64F).var()
+    return imageVar
+
+
 app = Flask(__name__)
 CORS(app, supports_credentials=True)  # 设置跨域
 
 
-@app.route("/", methods=['GET', 'POST'])
-def index():
+@app.route("/clear", methods=['GET', 'POST'])
+def clear():
     data = request.get_json()
     img = data['data'].split(',')[1]
 
@@ -37,6 +44,18 @@ def index():
     base64img = cv2_base64(wraped)
 
     return jsonify({"image": "data:image/png;base64," + base64img})
+
+
+@app.route("/check", methods=['GET', 'POST'])
+def check():
+    data = request.get_json()
+    img = data['data'].split(',')[1]
+
+    cv2img = base64_cv2(img)
+
+    score = getImageVar(cv2img)
+
+    return jsonify({"score": score})
 
 
 if __name__ == "__main__":
